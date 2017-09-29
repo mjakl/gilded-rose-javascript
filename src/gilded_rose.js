@@ -32,6 +32,25 @@ class TicketStrategy{
   }
 }
 
+class ConjuredStrategy
+{
+  check(item){
+      item.sellIn = item.sellIn - 1;
+
+      if (isLessThan0day(item)) {
+        if (isAboveMinQuality(item)) {
+          item.quality = item.quality / 2;
+        }
+      }
+
+      if (isAboveMinQuality(item)) {
+        item.quality = item.quality / 2;
+      }
+
+    return item;
+  }
+}
+
 class FallbackStrategy{
   check(item){
 
@@ -41,6 +60,10 @@ class FallbackStrategy{
         if (isAboveMinQuality(item)) {
           item.quality =item.quality - 1;
         }
+      }
+
+      if (isAboveMinQuality(item)) {
+        item.quality = item.quality - 1;
       }
     return item;
 }
@@ -75,6 +98,8 @@ class CheeseStrategy
 
 const isEqualToName  = (item, cond) => item.name == cond;
 
+const isConjured = (item)=> isEqualToName(item, 'Conjured Mana Cake');
+
 const isLegendary = (item)=> isEqualToName(item, 'Sulfuras, Hand of Ragnaros');
 const isNotLegendary = (item)=> !isEqualToName(item, 'Sulfuras, Hand of Ragnaros');
 
@@ -84,12 +109,14 @@ const isNotTicket = (item)=> !isEqualToName(item, 'Backstage passes to a TAFKAL8
 const isCheese = (item)=> isEqualToName(item, 'Aged Brie');
 const isNotCheese = (item)=> !isEqualToName(item, 'Aged Brie');
 
+
 const isBelowMaxQuality = (item) => item.quality < 50 ;
 const isAboveMinQuality = (item) => item.quality > 0 ;
 
 const isLessThan11day = (item) => item.sellIn <11;
 const isLessThan6day = (item) => item.sellIn <6;
 const isLessThan0day = (item) => item.sellIn <0;
+
 
 const isAboveMinQualityAndIsNotLegendary = (item) => isAboveMinQuality(item) && isNotLegendary(item)
 const isNotCheeseAndIsNotTicket = (item)=> isNotCheese(item) && isNotTicket(item);
@@ -102,6 +129,7 @@ export class Shop {
     this.ticketStrategy = new TicketStrategy();
     this.legendaryStrategy = new LegendaryStrategy();
     this.cheesStrategy = new CheeseStrategy();
+    this.conjuredStrategy = new ConjuredStrategy();
     this.fallbackStrategy = new FallbackStrategy();
 
   }
@@ -125,9 +153,12 @@ export class Shop {
         continue;
       }
 
-      if (isAboveMinQuality(item)) {
-        this.items[i].quality = this.items[i].quality - 1;
+      if(isConjured(item))
+      {
+        this.conjuredStrategy.check(item);
+        continue;
       }
+
 
       this.fallbackStrategy.check(item);
     }
