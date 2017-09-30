@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "pretest": "yarn run lint",
     "test": "jest",
+    "lint": "eslint src/**/*.js",
+    "fix": "eslint --fix src/**/*.js",
     "fixture": "babel-node --presets es2015 fixture.js"
   },
   "author": "",
@@ -13,6 +16,10 @@
     "babel-cli": "^6.26.0",
     "babel-jest": "^21.0.0",
     "babel-preset-es2015": "^6.24.1",
-    "jest": "^21.0.1"
+    "eslint": "^4.8.0",
+    "eslint-config-prettier": "^2.6.0",
+    "eslint-plugin-prettier": "^2.3.1",
+    "jest": "^21.0.1",
+    "prettier": "^1.7.2"
   }
 }
