@@ -37,13 +37,19 @@ class ManagedItem {
 }
 
 class DegradingItem extends ManagedItem {
-  updateQuality() {
+  updateQuality(factor = 1) {
     if (this.getRemainingDays() === 0) {
-      this.reduceQuality(2);
+      this.reduceQuality(2 * factor);
     } else {
-      this.reduceQuality(1);
+      this.reduceQuality(factor);
     }
     this.reduceSellIn();
+  }
+}
+
+class ConjuredItem extends DegradingItem {
+  updateQuality() {
+    super.updateQuality(2);
   }
 }
 
@@ -84,6 +90,7 @@ export class Shop {
     const brie = "Aged Brie";
     const backstagePass = "Backstage passes to a TAFKAL80ETC concert";
     const sulfuras = "Sulfuras, Hand of Ragnaros";
+    const conjured = "Conjured";
 
     switch (item.name) {
       case brie:
@@ -92,6 +99,8 @@ export class Shop {
         return new BackstageItem(item);
       case sulfuras:
         return new SulfurasItem(item);
+      case conjured:
+        return new ConjuredItem(item);
       default:
         return new DegradingItem(item);
     }
