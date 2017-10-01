@@ -6,65 +6,99 @@ export class Item {
   }
 }
 
+class ManagedItem {
+  constructor(item) {
+    this.item = item;
+  };
+
+  getItem() {
+    return this.item;
+  }
+
+  reduceSellIn() {
+    this.item.sellIn = Math.max(this.item.sellIn - 1, 0);
+  }
+  
+  getRemainingDays() {
+    return this.item.sellIn;
+  }
+
+  setQuality(quality) {
+    this.item.quality = quality;
+  }
+
+  reduceQuality(delta) {
+    this.item.quality = Math.max(this.item.quality - delta, 0);
+  }
+
+  increaseQuality(delta) {
+    this.item.quality = Math.min(this.item.quality + delta, 50);
+  }
+}
+
+class DegradingItem extends ManagedItem {
+  updateQuality() {
+    if (this.getRemainingDays() === 0) {
+      this.reduceQuality(2);
+    } else {
+      this.reduceQuality(1);
+    }
+    this.reduceSellIn();
+  }
+}
+
+class BrieItem extends ManagedItem {
+  updateQuality() {
+    this.increaseQuality(1);
+    this.reduceSellIn();
+  }
+}
+
+class BackstageItem extends ManagedItem {
+  updateQuality() {
+    if (this.getRemainingDays() === 0) {
+      this.setQuality(0);
+    } else if (this.getRemainingDays() <= 5) {
+      this.increaseQuality(3);
+    } else if (this.getRemainingDays() <= 10) {
+      this.increaseQuality(2);
+    } else {
+      this.increaseQuality(1);
+    }
+    this.reduceSellIn();
+  }
+}
+
+class SulfurasItem extends ManagedItem {
+  updateQuality() {
+    // stays as is
+  }
+}
+
 export class Shop {
   constructor(items = []) {
-    this.items = items;
+    this.items = items.map(Shop.toManagedItem);
   }
-  updateQuality() {
-    for (var i = 0; i < this.items.length; i++) {
-      if (
-        this.items[i].name != "Aged Brie" &&
-        this.items[i].name != "Backstage passes to a TAFKAL80ETC concert"
-      ) {
-        if (this.items[i].quality > 0) {
-          if (this.items[i].name != "Sulfuras, Hand of Ragnaros") {
-            this.items[i].quality = this.items[i].quality - 1;
-          }
-        }
-      } else {
-        if (this.items[i].quality < 50) {
-          this.items[i].quality = this.items[i].quality + 1;
-          if (
-            this.items[i].name == "Backstage passes to a TAFKAL80ETC concert"
-          ) {
-            if (this.items[i].sellIn < 11) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-            if (this.items[i].sellIn < 6) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1;
-              }
-            }
-          }
-        }
-      }
-      if (this.items[i].name != "Sulfuras, Hand of Ragnaros") {
-        this.items[i].sellIn = this.items[i].sellIn - 1;
-      }
-      if (this.items[i].sellIn < 0) {
-        if (this.items[i].name != "Aged Brie") {
-          if (
-            this.items[i].name != "Backstage passes to a TAFKAL80ETC concert"
-          ) {
-            if (this.items[i].quality > 0) {
-              if (this.items[i].name != "Sulfuras, Hand of Ragnaros") {
-                this.items[i].quality = this.items[i].quality - 1;
-              }
-            }
-          } else {
-            this.items[i].quality =
-              this.items[i].quality - this.items[i].quality;
-          }
-        } else {
-          if (this.items[i].quality < 50) {
-            this.items[i].quality = this.items[i].quality + 1;
-          }
-        }
-      }
-    }
 
-    return this.items;
+  static toManagedItem(item) {
+    const brie = "Aged Brie";
+    const backstagePass = "Backstage passes to a TAFKAL80ETC concert";
+    const sulfuras = "Sulfuras, Hand of Ragnaros";
+
+    switch (item.name) {
+      case brie:
+        return new BrieItem(item);
+      case backstagePass:
+        return new BackstageItem(item);
+      case sulfuras:
+        return new SulfurasItem(item);
+      default:
+        return new DegradingItem(item);
+    }
+  }
+
+  updateQuality() {
+    this.items.map(item => item.updateQuality());
+    return this.items.map(item => item.getItem());
   }
 }
