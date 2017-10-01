@@ -11,6 +11,26 @@ class ManagedItem {
     this.item = item;
   };
 
+  static toManagedItem(item) {
+    const brie = "Aged Brie";
+    const backstagePass = "Backstage passes to a TAFKAL80ETC concert";
+    const sulfuras = "Sulfuras, Hand of Ragnaros";
+    const conjured = "Conjured";
+
+    switch (item.name) {
+      case brie:
+        return new BrieItem(item);
+      case backstagePass:
+        return new BackstageItem(item);
+      case sulfuras:
+        return new SulfurasItem(item);
+      case conjured:
+        return new ConjuredItem(item);
+      default:
+        return new DegradingItem(item);
+    }
+  }
+
   getItem() {
     return this.item;
   }
@@ -83,27 +103,7 @@ class SulfurasItem extends ManagedItem {
 
 export class Shop {
   constructor(items = []) {
-    this.items = items.map(Shop.toManagedItem);
-  }
-
-  static toManagedItem(item) {
-    const brie = "Aged Brie";
-    const backstagePass = "Backstage passes to a TAFKAL80ETC concert";
-    const sulfuras = "Sulfuras, Hand of Ragnaros";
-    const conjured = "Conjured";
-
-    switch (item.name) {
-      case brie:
-        return new BrieItem(item);
-      case backstagePass:
-        return new BackstageItem(item);
-      case sulfuras:
-        return new SulfurasItem(item);
-      case conjured:
-        return new ConjuredItem(item);
-      default:
-        return new DegradingItem(item);
-    }
+    this.items = items.map(ManagedItem.toManagedItem);
   }
 
   updateQuality() {
